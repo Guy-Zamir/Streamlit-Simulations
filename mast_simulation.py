@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 st.title('Mast Simulation')
 
 # Users parameters
-days_to_simulate = st.number_input('Days to Simulate', min_value=1, max_value=365*50, value=365*30, step=1)
-n_iteration = st.number_input('Number of Iterations', min_value=1, max_value=10000, value=1, step=1)
-daily_probability_to_mast_on_taking_money = st.number_input('Average Daily Mast on Taking Money', min_value=0.0, max_value=5.0, value=0.01, step=0.01, format="%.2f")
-daily_mast_not_taking_money = st.number_input('Average Daily Mast Not Taking Money', min_value=0, max_value=10, value=2, step=1, format="%.2f")
-yearly_return_on_investment = st.slider('Yearly Return on Investment', min_value=0.0, max_value=0.20, value=0.05, step=0.01)
+days_to_simulate = st.number_input('Days To Simulate', min_value=1, max_value=365*50, value=365*30, step=1)
+n_iteration = st.number_input('Number Of Iterations', min_value=1, max_value=10000, value=1, step=1)
+daily_probability_to_mast_on_taking_money = st.number_input('Daily Probability To Mast - Taking Money', min_value=0.0, max_value=5.0, value=0.01, step=0.01, format="%.2f")
+daily_mast_not_taking_money = st.number_input('Average Daily Mast - Not Taking Money', min_value=0.0, max_value=10.0, value=2.0, step=1.0, format="%.2f")
+yearly_return_on_investment = st.slider('Yearly Return On Investment', min_value=0.0, max_value=0.20, value=0.05, step=0.01)
 invest_the_money = st.checkbox('Invest the Money', value=True)
 
 # Initialize arrays to store results
