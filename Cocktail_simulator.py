@@ -1,27 +1,13 @@
 import streamlit as st
 import numpy as np
 
-def get_regular_config():
-    # Weight, Multiplier
-    config = [
-        (250, 60),
-        (250, 80),
-        (320, 100),
-        (160, 200),
-        (30, 500),
-        (5, 1500)
-    ]
-    return config
-
-
 def get_probabilities(weights_list):
     weights_sum = sum(weights_list)
     prob_list = [weight / weights_sum for weight in weights_list]
     return prob_list
 
-
-def run_simulation(iteration_num, cocktail_num, win_all_prob, extra_drink_prob_list):
-    weights, multipliers = zip(*get_regular_config())
+def run_simulation(iteration_num, cocktail_num, win_all_prob, extra_drink_prob_list, config):
+    weights, multipliers = zip(*config)  # Use the passed config instead of get_regular_config
     iterations_result_list = []
 
     for iteration in range(iteration_num):
@@ -48,7 +34,7 @@ def run_simulation(iteration_num, cocktail_num, win_all_prob, extra_drink_prob_l
 
     return np.mean(iterations_result_list), np.median(iterations_result_list)
 
-
+# Streamlit UI
 st.title("Cocktail Simulation")
 st.sidebar.header("Simulation Parameters")
 
@@ -63,9 +49,17 @@ for i in range(5):
 
 st.sidebar.header("Configuration (Weight, Multiplier)")
 config = []
-for i in range(6):
-    weight = st.sidebar.number_input(f"Weight {i+1}", min_value=1, max_value=1000, value=get_regular_config()[i][0], step=1)
-    multiplier = st.sidebar.number_input(f"Multiplier {i+1}", min_value=1, max_value=5000, value=get_regular_config()[i][1], step=1)
+default_config = [
+    (250, 60),
+    (250, 80),
+    (320, 100),
+    (160, 200),
+    (30, 500),
+    (5, 1500)
+]
+for i in range(len(default_config)):
+    weight = st.sidebar.number_input(f"Weight {i+1}", min_value=1, max_value=1000, value=default_config[i][0], step=1)
+    multiplier = st.sidebar.number_input(f"Multiplier {i+1}", min_value=1, max_value=5000, value=default_config[i][1], step=1)
     config.append((weight, multiplier))
 
 if st.button("Run Simulation"):
