@@ -1,5 +1,6 @@
 import streamlit as st
 import numpy as np
+import matplotlib.pyplot as plt
 
 def get_probabilities(weights_list):
     weights_sum = sum(weights_list)
@@ -7,12 +8,12 @@ def get_probabilities(weights_list):
     return prob_list
 
 def run_simulation(iteration_num, cocktail_num, win_all_prob, extra_drink_prob_list, config):
-    weights, multipliers = zip(*config)  # Use the passed config instead of get_regular_config
+    weights, multipliers = zip(*config)
     iterations_result_list = []
 
     for iteration in range(iteration_num):
-        iteration_weights = weights
-        iteration_multipliers = multipliers
+        iteration_weights = list(weights)
+        iteration_multipliers = list(multipliers)
         iteration_multiplier = 0
         iteration_cocktail_num = cocktail_num
 
@@ -27,12 +28,12 @@ def run_simulation(iteration_num, cocktail_num, win_all_prob, extra_drink_prob_l
                 iteration_probabilities = get_probabilities(iteration_weights)
                 chosen_index = np.random.choice(len(iteration_probabilities), p=iteration_probabilities)
                 iteration_multiplier += iteration_multipliers[chosen_index]
-                iteration_weights = iteration_weights[:chosen_index] + iteration_weights[chosen_index + 1:]
-                iteration_multipliers = iteration_multipliers[:chosen_index] + iteration_multipliers[chosen_index + 1:]
+                del iteration_weights[chosen_index]
+                del iteration_multipliers[chosen_index]
 
         iterations_result_list.append(iteration_multiplier)
 
-    return np.mean(iterations_result_list), np.median(iterations_result_list)
+    return iterations_result_list
 
 # Streamlit UI
 st.title("Cocktail Simulation")
@@ -57,12 +58,39 @@ default_config = [
     (30, 500),
     (5, 1500)
 ]
+
+st.write("### Reward Configurations")
 for i in range(len(default_config)):
-    weight = st.sidebar.number_input(f"Weight {i+1}", min_value=1, max_value=1000, value=default_config[i][0], step=1)
-    multiplier = st.sidebar.number_input(f"Multiplier {i+1}", min_value=1, max_value=5000, value=default_config[i][1], step=1)
+    st.write(f"**Multiplier {i+1}:**")
+    col1, col2 = st.columns(2)
+    with col1:
+        weight = st.number_input(f"Weight {i+1}", min_value=1, max_value=1000, value=default_config[i][0], step=1, key=f"weight_{i}")
+    with col2:
+        multiplier = st.number_input(f"Multiplier {i+1}", min_value=1, max_value=5000, value=default_config[i][1], step=1, key=f"multiplier_{i}")
     config.append((weight, multiplier))
 
 if st.button("Run Simulation"):
-    avg_multiplier, median_multiplier = run_simulation(iteration_num, cocktail_num, win_all_prob, extra_drink_prob_list, config)
-    st.write(f'**Average Multiplier:** {avg_multiplier}')
-    st.write(f'**Median Multiplier:** {median_multiplier}')
+    results = run_simulation(iteration_num, cocktail_num, win_all_prob, extra_drink_prob_list, config)
+
+    avg_multiplier = np.mean(results)
+    median_multiplier = np.median(results)
+    p25 = np.percentile(results, 25)
+    p75 = np.percentile(results, 75)
+    min_val = np.min(results)
+    max_val = np.max(results)
+
+    st.write(f"**Average Multiplier:** {avg_multiplier}")
+    st.write(f"**Median Multiplier:** {median_multiplier}")
+    st.write(f"**P25:** {p25}")
+    st.write(f"**P75:** {p75}")
+    st.write(f"**Min:** {min_val}")
+    st.write(f"**Max:** {max_val}")
+
+    # Plotting the results
+    st.write("### Results Distribution")
+    fig, ax = plt.subplots()
+    ax.hist(results, bins=50, alpha=0.75, edgecolor='black')
+    ax.set_title("Distribution of Multipliers")
+    ax.set_xlabel("Multiplier")
+    ax.set_ylabel("Frequency")
+    st.pyplot(fig)
